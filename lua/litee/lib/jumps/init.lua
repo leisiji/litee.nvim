@@ -2,6 +2,16 @@ local config    = require('litee.lib.config').config
 local lib_hi    = require('litee.lib.highlights')
 local lib_panel = require('litee.lib.panel')
 
+local function jump_to_location(location)
+  local client = vim.lsp.get_clients({ bufnr = bufnr })[1]
+  local offset_encoding = client and client.offset_encoding or "utf-16"
+  if vim.lsp.util.show_document then
+    vim.lsp.util.show_document(location, offset_encoding, { focus = true })
+  else
+    vim.lsp.util.jump_to_location(location, offset_encoding, true)
+  end
+end
+
 local M = {}
 
 -- the current highlight source, reset on jumps
@@ -62,7 +72,7 @@ function M.jump_tab(location, node, offset_encoding)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
+    jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 end
 
@@ -83,7 +93,7 @@ function M.jump_split(split, location, node, offset_encoding)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
+    jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 end
 
@@ -103,7 +113,7 @@ function M.jump_neighbor(location, node, offset_encoding)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
+    jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
@@ -147,7 +157,7 @@ function M.jump_invoking(location, win, node, offset_encoding)
     -- if the panel currently has a component "popped-out"
     -- close it before jumping.
     lib_panel.close_current_popout()
-    vim.lsp.util.jump_to_location(location, offset_encoding or "utf-8")
+    jump_to_location(location, offset_encoding or "utf-8")
     M.set_jump_hl(true, node)
 
     -- cleanup any [No Name] buffers if they exist
