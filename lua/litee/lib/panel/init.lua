@@ -124,6 +124,7 @@ function M.toggle_panel(state, keep_open, cycle, close)
         end
     end
 
+    local last_component_win = nil
     for component, callbacks in pairs(components) do
         if state[component] ~= nil then
             if callbacks.pre(state) then
@@ -135,10 +136,17 @@ function M.toggle_panel(state, keep_open, cycle, close)
                         component_cursors[component]
                     )
                 end
+                -- remember the last created component window
+                last_component_win = state[component].win
             end
         end
     end
-    vim.api.nvim_set_current_win(cur_win)
+    -- set focus to the last created component window if it exists, otherwise return to original window
+    if last_component_win ~= nil and vim.api.nvim_win_is_valid(last_component_win) then
+        vim.api.nvim_set_current_win(last_component_win)
+    else
+        vim.api.nvim_set_current_win(cur_win)
+    end
 end
 
 -- Similar to toggle_panel but retrieves state from
