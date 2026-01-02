@@ -10,18 +10,18 @@ local M = {}
 --
 -- @param str (string) The string to encode.
 function M.safe_encode(str)
-    str, _ = string.gsub(str, '/', '%%2F')
-    str, _ = string.gsub(str, ' ', '%%20')
-    str, _ = string.gsub(str, ':', '%%3A')
+    str, _ = string.gsub(str, "/", "%%2F")
+    str, _ = string.gsub(str, " ", "%%20")
+    str, _ = string.gsub(str, ":", "%%3A")
     return str
 end
 
 -- decodes a string encoded by safe_encode.
 -- see safe_encode for details.
 function M.safe_decode(str)
-    str, _ = string.gsub(str, '%%2F', '/')
-    str, _ = string.gsub(str, '%%20', ' ')
-    str, _ = string.gsub(str, '%%3A', ':')
+    str, _ = string.gsub(str, "%%2F", "/")
+    str, _ = string.gsub(str, "%%20", " ")
+    str, _ = string.gsub(str, "%%3A", ":")
     return str
 end
 
@@ -55,27 +55,27 @@ end
 -- the provided uri.
 function M.basename(uri)
     local final_sep = vim.fn.strridx(uri, "/")
-    local uri_len   = vim.fn.strlen(uri)
+    local uri_len = vim.fn.strlen(uri)
 
     -- if its a dir, remove final "/"
-    if final_sep+1 == uri_len then
-        uri = vim.fn.strpart(uri, 0, uri_len-1)
+    if final_sep + 1 == uri_len then
+        uri = vim.fn.strpart(uri, 0, uri_len - 1)
         final_sep = vim.fn.strridx(uri, "/")
     end
 
-    local dir = vim.fn.strpart(uri, final_sep+1, vim.fn.strlen(uri))
+    local dir = vim.fn.strpart(uri, final_sep + 1, vim.fn.strlen(uri))
     return dir
 end
 
 function M.parent_dir(path)
-        local base = M.basename(path)
-        local diff = vim.fn.strlen(path) - (vim.fn.strlen(base)+1)
-        local res = vim.fn.strpart(path, 0, diff)
-        if vim.fn.strridx(path, "/") == #path-1 then
-            return res
-        else
-            return res .. "/"
-        end
+    local base = M.basename(path)
+    local diff = vim.fn.strlen(path) - (vim.fn.strlen(base) + 1)
+    local res = vim.fn.strpart(path, 0, diff)
+    if vim.fn.strridx(path, "/") == #path - 1 then
+        return res
+    else
+        return res .. "/"
+    end
 end
 
 function M.path_prefix_match(prefix, path)
@@ -101,8 +101,8 @@ function M.add_file_prefix(path)
 end
 
 function M.strip_trailing_slash(path)
-    if vim.fn.strridx(path, "/") == (vim.fn.strlen(path)-1) then
-        return vim.fn.strpart(path, 0, vim.fn.strlen(path)-1)
+    if vim.fn.strridx(path, "/") == (vim.fn.strlen(path) - 1) then
+        return vim.fn.strpart(path, 0, vim.fn.strlen(path) - 1)
     end
     return path
 end
@@ -111,8 +111,8 @@ end
 -- relative path, and ensure leading '/'
 function M.strip_path_prefix(prefix, path)
     local new = vim.fn.substitute(path, prefix, "", "")
-    if vim.fn.strridx(new, '/') == -1 then
-        new = '/' .. new
+    if vim.fn.strridx(new, "/") == -1 then
+        new = "/" .. new
     end
     return new
 end

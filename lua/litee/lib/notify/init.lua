@@ -1,4 +1,4 @@
-local notify_config = require('litee.lib.config').config["notify"]
+local notify_config = require("litee.lib.config").config["notify"]
 local M = {}
 
 local float_wins = {}
@@ -24,9 +24,7 @@ function M.notify_popup_with_timeout(text, ms, sev)
     end
     M.notify_popup(text, sev)
     local timer = vim.loop.new_timer()
-    timer:start(ms, 0, vim.schedule_wrap(
-        M.close_notify_popup
-    ))
+    timer:start(ms, 0, vim.schedule_wrap(M.close_notify_popup))
 end
 
 function M.notify_popup(text, sev)
@@ -40,22 +38,22 @@ function M.notify_popup(text, sev)
 
     local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then
-        vim.api.nvim_err_writeln("details_popup: could not create details buffer")
+        vim.notify("details_popup: could not create details buffer", vim.log.levels.ERROR)
         return
     end
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'delete')
-    vim.api.nvim_buf_set_option(buf, 'syntax', 'yaml')
+    vim.api.nvim_set_option_value("bufhidden", "delete", { buf = buf })
+    vim.api.nvim_set_option_value("syntax", "yaml", { buf = buf })
 
-    local lines = {text}
+    local lines = { text }
     local width = 20
     local line_width = vim.fn.strdisplaywidth(text)
     if line_width > width then
         width = line_width
     end
 
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
     vim.api.nvim_buf_set_lines(buf, 0, #lines, false, lines)
-    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
     local popup_conf = {
         relative = "editor",
         anchor = "SE",
@@ -71,11 +69,11 @@ function M.notify_popup(text, sev)
     local float_win = vim.api.nvim_open_win(buf, false, popup_conf)
     table.insert(float_wins, float_win)
     if sev == "error" then
-        vim.api.nvim_win_set_option(float_win, 'winhl', "Normal:Error")
+        vim.api.nvim_set_option_value("winhl", "Normal:Error", { win = float_win })
     elseif sev == "warning" then
-        vim.api.nvim_win_set_option(float_win, 'winhl', "Normal:WarningMsg")
+        vim.api.nvim_set_option_value("winhl", "Normal:WarningMsg", { win = float_win })
     else
-        vim.api.nvim_win_set_option(float_win, 'winhl', "Normal:NormalFloat")
+        vim.api.nvim_set_option_value("winhl", "Normal:NormalFloat", { win = float_win })
     end
 end
 

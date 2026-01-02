@@ -1,8 +1,8 @@
-local lib_state = require('litee.lib.state')
-local config = require('litee.lib.config').config
-local lib_notify = require('litee.lib.notify')
-local lib_util = require('litee.lib.util')
-local lib_util_win = require('litee.lib.util.window')
+local lib_state = require("litee.lib.state")
+local config = require("litee.lib.config").config
+local lib_notify = require("litee.lib.notify")
+local lib_util = require("litee.lib.util")
+local lib_util_win = require("litee.lib.util.window")
 
 local M = {}
 
@@ -42,7 +42,7 @@ local components = {}
 function M.register_component(component, pre_window_create, post_window_create)
     components[component] = {
         pre = pre_window_create,
-        post = post_window_create
+        post = post_window_create,
     }
 end
 
@@ -79,7 +79,11 @@ function M.toggle_panel(state, keep_open, cycle, close)
         local cur_tab = vim.api.nvim_get_current_tabpage()
         state = lib_state.get_state(cur_tab)
         if state == nil then
-            lib_notify.notify_popup_with_timeout("Must open a litee component before toggling the panel.", 1750, "error")
+            lib_notify.notify_popup_with_timeout(
+                "Must open a litee component before toggling the panel.",
+                1750,
+                "error"
+            )
             return
         end
     end
@@ -98,11 +102,7 @@ function M.toggle_panel(state, keep_open, cycle, close)
 
     -- components are open, close them, recording its dimensions
     -- for proper restore.
-    if
-        not keep_open or
-        cycle or
-        close
-    then
+    if not keep_open or cycle or close then
         if component_open then
             for component, _ in pairs(components) do
                 if
@@ -112,7 +112,7 @@ function M.toggle_panel(state, keep_open, cycle, close)
                 then
                     state[component].win_dimensions = {
                         height = vim.api.nvim_win_get_height(state[component].win),
-                        width = vim.api.nvim_win_get_width(state[component].win)
+                        width = vim.api.nvim_win_get_width(state[component].win),
                     }
                     vim.api.nvim_win_close(state[component].win, true)
                 end
@@ -131,10 +131,7 @@ function M.toggle_panel(state, keep_open, cycle, close)
                 M._open_window(component, state)
                 -- restore cursor positions if possible.
                 if component_cursors[component] ~= nil then
-                    lib_util.safe_cursor_reset(
-                        state[component].win,
-                        component_cursors[component]
-                    )
+                    lib_util.safe_cursor_reset(state[component].win, component_cursors[component])
                 end
                 -- remember the last created component window
                 last_component_win = state[component].win
@@ -176,15 +173,13 @@ end
 -- the declarative evaluation of the panel layout. This occurs if the desired
 -- component is already being displayed.
 local function realize_current_and_desired(check_component, desired_component, current_layout, desired_layout, state)
-    local current_tabpage = vim.api.nvim_win_get_tabpage(
-        vim.api.nvim_get_current_win()
-    )
+    local current_tabpage = vim.api.nvim_win_get_tabpage(vim.api.nvim_get_current_win())
 
     -- check if the desired window exists.
     if
-        state[check_component] == nil or
-        state[check_component].win == nil or
-        (not vim.api.nvim_win_is_valid(state[check_component].win))
+        state[check_component] == nil
+        or state[check_component].win == nil
+        or (not vim.api.nvim_win_is_valid(state[check_component].win))
     then
         if check_component == desired_component then
             -- checked window is invalid, its also the desired window to open
@@ -231,7 +226,9 @@ function M._open_window(desired_component, state)
     local desired_layout = {}
 
     for check_component, _ in pairs(components) do
-        if not realize_current_and_desired(check_component, desired_component, current_layout, desired_layout, state) then
+        if
+            not realize_current_and_desired(check_component, desired_component, current_layout, desired_layout, state)
+        then
             return
         end
     end
@@ -256,14 +253,11 @@ function M.open_to(component, state)
         return false
     end
     local current_win = vim.api.nvim_get_current_win()
-    if  current_win == state[component].win then
+    if current_win == state[component].win then
         vim.api.nvim_set_current_win(state[component].invoking_win)
         return
     end
-    if
-        state[component].win ~= nil
-        and vim.api.nvim_win_is_valid(state[component].win)
-    then
+    if state[component].win ~= nil and vim.api.nvim_win_is_valid(state[component].win) then
         vim.api.nvim_set_current_win(state[component].win)
         return
     end
@@ -314,11 +308,7 @@ end
 -- @param after_focus Same as "before_focus" but runs inside
 -- the newly created popout floating win.
 function M.popout_to(component, state, before_focus, after_focus)
-    if
-        state == nil
-        or state[component] == nil
-        or components[component] == nil
-    then
+    if state == nil or state[component] == nil or components[component] == nil then
         return
     end
 
@@ -335,16 +325,17 @@ function M.popout_to(component, state, before_focus, after_focus)
     local popup_conf = {
         relative = "editor",
         anchor = "NW",
-        width = math.floor(vim.opt.columns:get()/2),
-        height = math.floor(vim.opt.lines:get()/2),
+        width = math.floor(vim.opt.columns:get() / 2),
+        height = math.floor(vim.opt.lines:get() / 2),
         focusable = true,
         zindex = 98,
         border = "rounded",
-        row = math.floor(vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1)/2),
-        col = math.floor(vim.opt.columns:get()/2),
+        row = math.floor(vim.opt.lines:get() - (vim.opt.cmdheight:get() + 1) / 2),
+        col = math.floor(vim.opt.columns:get() / 2),
     }
 
-    if  M.popout_panel_state.panel_open
+    if
+        M.popout_panel_state.panel_open
         and state[component].win ~= nil
         and vim.api.nvim_win_is_valid(state[component].win)
     then
@@ -415,20 +406,16 @@ function M._setup_window(current_layout, desired_layout, state)
             -- there is no current layout, so just do a botright or equivalent
             if config["panel"].orientation == "left" then
                 vim.cmd("topleft vsplit")
-                vim.cmd("vertical resize " ..
-                            config["panel"].panel_size)
+                vim.cmd("vertical resize " .. config["panel"].panel_size)
             elseif config["panel"].orientation == "right" then
                 vim.cmd("botright vsplit")
-                vim.cmd("vertical resize " ..
-                            config["panel"].panel_size)
+                vim.cmd("vertical resize " .. config["panel"].panel_size)
             elseif config["panel"].orientation == "top" then
                 vim.cmd("topleft split")
-                vim.cmd("resize " ..
-                            config["panel"].panel_size)
+                vim.cmd("resize " .. config["panel"].panel_size)
             elseif config["panel"].orientation == "bottom" then
                 vim.cmd("botright split")
-                vim.cmd("resize " ..
-                            config["panel"].panel_size)
+                vim.cmd("resize " .. config["panel"].panel_size)
             end
             goto set
         end
@@ -449,12 +436,8 @@ function M._setup_window(current_layout, desired_layout, state)
         state[component].win = cur_win
         vim.api.nvim_win_set_buf(state[component].win, buffer_to_set)
         M._set_win_opts(state[component].win)
-        if
-            dimensions_to_set ~= nil and
-            dimensions_to_set.width ~= nil and
-            dimensions_to_set.height ~= nil
-        then
-            if (config["panel"].orientation == "left" or config["panel"].orientation == "right") then
+        if dimensions_to_set ~= nil and dimensions_to_set.width ~= nil and dimensions_to_set.height ~= nil then
+            if config["panel"].orientation == "left" or config["panel"].orientation == "right" then
                 vim.api.nvim_win_set_width(cur_win, dimensions_to_set.width)
             else
                 vim.api.nvim_win_set_height(cur_win, dimensions_to_set.height)
@@ -462,7 +445,7 @@ function M._setup_window(current_layout, desired_layout, state)
         else
             dimensions_to_set = {}
             dimensions_to_set.height = vim.api.nvim_win_get_height(cur_win)
-            dimensions_to_set.wdith  = vim.api.nvim_win_get_width(cur_win)
+            dimensions_to_set.wdith = vim.api.nvim_win_get_width(cur_win)
             state[component].dimensions = dimensions_to_set
         end
 
@@ -477,14 +460,14 @@ end
 -- panel window.
 -- @param win (int) Window ID of panel window
 function M._set_win_opts(win)
-    vim.api.nvim_win_set_option(win, 'number', false)
-    vim.api.nvim_win_set_option(win, 'cursorline', true)
-    vim.api.nvim_win_set_option(win, 'relativenumber', false)
-    vim.api.nvim_win_set_option(win, 'signcolumn', 'no')
-    vim.api.nvim_win_set_option(win, 'wrap', false)
-    vim.api.nvim_win_set_option(win, 'winfixwidth', true)
-    vim.api.nvim_win_set_option(win, 'winfixheight', true)
-    vim.api.nvim_win_set_option(win, 'winhighlight', 'Normal:NormalSB')
+    vim.api.nvim_win_set_option(win, "number", false)
+    vim.api.nvim_win_set_option(win, "cursorline", true)
+    vim.api.nvim_win_set_option(win, "relativenumber", false)
+    vim.api.nvim_win_set_option(win, "signcolumn", "no")
+    vim.api.nvim_win_set_option(win, "wrap", false)
+    vim.api.nvim_win_set_option(win, "winfixwidth", true)
+    vim.api.nvim_win_set_option(win, "winfixheight", true)
+    vim.api.nvim_win_set_option(win, "winhighlight", "Normal:NormalSB")
 end
 
 return M

@@ -1,7 +1,7 @@
-local lib_util = require('litee.lib.util')
-local lib_hi    = require('litee.lib.highlights')
-local lib_tree_config = require('litee.lib.config').config["tree"]
-local icon_set = require('litee.lib').icon_set
+local lib_util = require("litee.lib.util")
+local lib_hi = require("litee.lib.highlights")
+local lib_tree_config = require("litee.lib.config").config["tree"]
+local icon_set = require("litee.lib").icon_set
 
 local M = {}
 
@@ -65,10 +65,7 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
     else
         expand_guide = icon_set["Collapsed"]
     end
-    if no_guide_leaf
-        and #node.children == 0
-        and node.expanded == true
-    then
+    if no_guide_leaf and #node.children == 0 and node.expanded == true then
         expand_guide = icon_set["Space"]
     end
 
@@ -81,7 +78,7 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
     end
 
     if lib_tree_config.indent_guides then
-        for i=1, node.depth do
+        for i = 1, node.depth do
             if i == 1 then
                 str = str .. icon_set["Space"]
             else
@@ -89,7 +86,7 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
             end
         end
     else
-        for _=1, node.depth do
+        for _ = 1, node.depth do
             str = str .. icon_set["Space"]
         end
     end
@@ -100,9 +97,9 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
 
     -- ▶ Func1
     str = str .. expand_guide .. icon_set["Space"]
-    str = str .. icon .. icon_set["Space"]  .. icon_set["Space"] .. name
+    str = str .. icon .. icon_set["Space"] .. icon_set["Space"] .. name
     -- return detail as virtual text chunk.
-    return str, {{detail, lib_hi.hls.SymbolDetailHL}}
+    return str, { { detail, lib_hi.hls.SymbolDetailHL } }
 end
 
 -- marshal_line takes a UI buffer line and
@@ -139,9 +136,9 @@ end
 -- virtual text lines. Start this function with an empty table.
 -- @param marshal_func (function(node)) A function
 -- when given a node returns the following strings
-    -- name: the display name for the node
-    -- detail: details to display about the node
-    -- icon: any icon associated with the node
+-- name: the display name for the node
+-- detail: details to display about the node
+-- icon: any icon associated with the node
 function M._marshal_tree(buf, lines, node, tree, virtual_text_lines, marshal_func, no_guide_leaf)
     if node.depth == 0 then
         virtual_text_lines = {}
@@ -159,15 +156,15 @@ function M._marshal_tree(buf, lines, node, tree, virtual_text_lines, marshal_fun
     -- exists in the source code file.
     if node.location ~= nil and not vim.tbl_isempty(node.location) then
         local start_line = node.location["range"]["start"].line
-        M.source_line_map[tree][start_line+1] = {
+        M.source_line_map[tree][start_line + 1] = {
             uri = lib_util.absolute_path_from_uri(node.location.uri),
-            line = #lines
+            line = #lines,
         }
     end
 
     -- if we are an expanded node or we are the root (always expand)
     -- recurse
-    if node.expanded  or node.depth == 0 then
+    if node.expanded or node.depth == 0 then
         for _, child in ipairs(node.children) do
             M._marshal_tree(buf, lines, child, tree, virtual_text_lines, marshal_func, no_guide_leaf)
         end
@@ -176,20 +173,20 @@ function M._marshal_tree(buf, lines, node, tree, virtual_text_lines, marshal_fun
     -- we are back at the root, all lines are inserted, lets write it out
     -- to the buffer
     if node.depth == 0 then
-        vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+        vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
         vim.api.nvim_buf_set_lines(buf, 0, -1, true, {})
         vim.api.nvim_buf_set_lines(buf, 0, #lines, false, lines)
-        vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+        vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
         for i, vt in ipairs(virtual_text_lines) do
             if vt[1][1] == "" then
                 goto continue
             end
             local opts = {
                 virt_text = vt,
-                virt_text_pos = 'eol',
-                hl_mode = 'combine'
+                virt_text_pos = "eol",
+                hl_mode = "combine",
             }
-            vim.api.nvim_buf_set_extmark(buf, 1, i-1, 0, opts)
+            vim.api.nvim_buf_set_extmark(buf, 1, i - 1, 0, opts)
             ::continue::
         end
     end

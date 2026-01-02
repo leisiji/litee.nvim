@@ -1,7 +1,7 @@
-local commands = require('litee.lib.commands')
-local config = require('litee.lib.config').config
-local lib_hi = require('litee.lib.highlights')
-local lib_icons = require('litee.lib.icons')
+local commands = require("litee.lib.commands")
+local config = require("litee.lib.config").config
+local lib_hi = require("litee.lib.highlights")
+local lib_icons = require("litee.lib.icons")
 
 local M = {}
 

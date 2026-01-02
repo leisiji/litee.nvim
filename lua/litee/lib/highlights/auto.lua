@@ -1,5 +1,5 @@
-local lib_util  = require('litee.lib.util')
-local lib_hi    = require('litee.lib.highlights')
+local lib_util = require("litee.lib.util")
+local lib_hi = require("litee.lib.highlights")
 
 local M = {}
 
@@ -26,12 +26,7 @@ function M.highlight(node, set, win)
     if not vim.api.nvim_buf_is_valid(buf) then
         return
     end
-    vim.api.nvim_buf_clear_namespace(
-        buf,
-        M.higlight_ns,
-        0,
-        -1
-    )
+    vim.api.nvim_buf_clear_namespace(buf, M.higlight_ns, 0, -1)
     if not set then
         return
     end
@@ -54,15 +49,11 @@ function M.highlight(node, set, win)
         return
     end
 
-    vim.api.nvim_buf_add_highlight(
-        buf,
-        M.higlight_ns,
-        lib_hi.hls.SymbolJumpHL,
-        range["start"].line,
-        range["start"].character,
-        range["end"].character
-    )
-    vim.api.nvim_win_set_cursor(win, {range["start"].line+1, 0})
+    vim.api.nvim_buf_set_extmark(buf, M.higlight_ns, range["start"].line, range["start"].character, {
+        end_col = range["end"].character,
+        hl_group = lib_hi.hls.SymbolJumpHL,
+    })
+    vim.api.nvim_win_set_cursor(win, { range["start"].line + 1, 0 })
 end
 
 return M

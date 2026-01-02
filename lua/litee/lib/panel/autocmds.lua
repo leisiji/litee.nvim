@@ -1,5 +1,5 @@
-local lib_state = require('litee.lib.state')
-local lib_panel = require('litee.lib.panel')
+local lib_state = require("litee.lib.state")
+local lib_panel = require("litee.lib.panel")
 
 local M = {}
 

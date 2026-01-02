@@ -6,8 +6,7 @@ local float_win = nil
 -- close_details_popups closes the created popup window
 -- if it exists.
 function M.close_details_popup()
-    if float_win ~= nil and
-        vim.api.nvim_win_is_valid(float_win) then
+    if float_win ~= nil and vim.api.nvim_win_is_valid(float_win) then
         vim.api.nvim_win_close(float_win, true)
         float_win = nil
     end
@@ -27,11 +26,11 @@ end
 function M.details_popup(state, node, detail_func)
     local buf = vim.api.nvim_create_buf(false, true)
     if buf == 0 then
-        vim.api.nvim_err_writeln("details_popup: could not create details buffer")
+        vim.notify("details_popup: could not create details buffer", vim.log.levels.ERROR)
         return
     end
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'delete')
-    vim.api.nvim_buf_set_option(buf, 'syntax', 'yaml')
+    vim.api.nvim_set_option_value("bufhidden", "delete", { buf = buf })
+    vim.api.nvim_set_option_value("syntax", "yaml", { buf = buf })
 
     local lines = detail_func(state, node)
     if lines == nil then
@@ -46,18 +45,14 @@ function M.details_popup(state, node, detail_func)
         end
     end
 
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+    vim.api.nvim_set_option_value("modifiable", true, { buf = buf })
     vim.api.nvim_buf_set_lines(buf, 0, #lines, false, lines)
-    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-    local popup_conf = vim.lsp.util.make_floating_popup_options(
-            width,
-            #lines,
-            {
-                border= "rounded",
-                focusable= false,
-                zindex = 99,
-            }
-    )
+    vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+    local popup_conf = vim.lsp.util.make_floating_popup_options(width, #lines, {
+        border = "rounded",
+        focusable = false,
+        zindex = 99,
+    })
     float_win = vim.api.nvim_open_win(buf, false, popup_conf)
 end
 

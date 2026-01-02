@@ -1,5 +1,5 @@
-local lib_notify = require('litee.lib.notify')
-local lib_tree_node = require('litee.lib.tree.node')
+local lib_notify = require("litee.lib.notify")
+local lib_tree_node = require("litee.lib.tree.node")
 
 local M = {}
 
@@ -41,11 +41,7 @@ function M.gather_symbols_async_handler(node, co)
         end
 
         for _, res in ipairs(result) do
-            if
-                res.location.uri == uri and
-                res.location.range.start.line ==
-                start_line
-            then
+            if res.location.uri == uri and res.location.range.start.line == start_line then
                 coroutine.resume(co, res)
                 return
             end
@@ -115,11 +111,7 @@ function M.symbol_from_node(clients, node, bufnr)
             goto continue
         end
         for _, res in ipairs(out.result) do
-            if
-                res.uri == node.uri and
-                res.location.range.start.line ==
-                node.call_hierarchy_item.range.start.line
-            then
+            if res.uri == node.uri and res.location.range.start.line == node.call_hierarchy_item.range.start.line then
                 return res
             end
         end
@@ -144,17 +136,17 @@ function M.conv_symbolinfo_to_docsymbol(symbolinfo)
     -- these are mandatory fields per the LSP spec,
     -- return nil if they arent there.
     if
-        symbolinfo.name == nil or
-        symbolinfo.kind == nil or
-        symbolinfo.location == nil or
-        symbolinfo.location.range == nil
+        symbolinfo.name == nil
+        or symbolinfo.kind == nil
+        or symbolinfo.location == nil
+        or symbolinfo.location.range == nil
     then
         return nil
     end
 
-    document_symbol.name    = symbolinfo.name
-    document_symbol.kind    = symbolinfo.kind
-    document_symbol.range   = symbolinfo.location.range
+    document_symbol.name = symbolinfo.name
+    document_symbol.kind = symbolinfo.kind
+    document_symbol.range = symbolinfo.location.range
     document_symbol.children = {}
     document_symbol.details = ""
     document_symbol.tags = {}

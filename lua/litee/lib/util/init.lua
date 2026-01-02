@@ -11,11 +11,7 @@ end
 -- safely be placed at the lowest available
 -- buffer line.
 function M.safe_cursor_reset(win, linenr)
-    if
-        win == nil
-        or not vim.api.nvim_win_is_valid(win)
-        or linenr == nil
-    then
+    if win == nil or not vim.api.nvim_win_is_valid(win) or linenr == nil then
         return
     end
     local lc = vim.api.nvim_buf_line_count(vim.api.nvim_win_get_buf(win))
@@ -44,20 +40,20 @@ function M.resolve_location(node)
     elseif node.call_hierarchy_item ~= nil then
         location = {
             uri = node.call_hierarchy_item.uri,
-            range = node.call_hierarchy_item.range
+            range = node.call_hierarchy_item.range,
         }
     elseif node.document_symbol ~= nil then
         location = {
             uri = node.uri,
-            range = node.document_symbol.selectionRange
+            range = node.document_symbol.selectionRange,
         }
     elseif node.filetree_item ~= nil then
         local range = {}
-        range["start"] = { line = 0, character = 0}
-        range["end"] = { line = 0, character = 0}
+        range["start"] = { line = 0, character = 0 }
+        range["end"] = { line = 0, character = 0 }
         location = {
             uri = "file://" .. node.filetree_item.uri,
-            range = range
+            range = range,
         }
     end
     return location
@@ -82,27 +78,27 @@ function M.resolve_hover_params(node)
     local params = {}
     if node.symbol ~= nil then
         params.textDocument = {
-            uri = node.symbol.location.uri
+            uri = node.symbol.location.uri,
         }
         params.position = {
             line = node.symbol.location.range.start.line,
-            character = node.symbol.location.range.start.character
+            character = node.symbol.location.range.start.character,
         }
     elseif node.call_hierarchy_item ~= nil then
         params.textDocument = {
-            uri = node.call_hierarchy_item.uri
+            uri = node.call_hierarchy_item.uri,
         }
         params.position = {
             line = node.call_hierarchy_item.range.start.line,
-            character = node.call_hierarchy_item.range.start.character
+            character = node.call_hierarchy_item.range.start.character,
         }
     elseif node.document_symbol ~= nil then
         params.textDocument = {
-            uri = node.uri
+            uri = node.uri,
         }
         params.position = {
             line = node.document_symbol.selectionRange.start.line,
-            character = node.document_symbol.selectionRange.start.character
+            character = node.document_symbol.selectionRange.start.character,
         }
     else
         return nil

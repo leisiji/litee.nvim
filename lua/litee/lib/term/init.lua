@@ -1,25 +1,25 @@
-local lib_panel = require('litee.lib.panel')
-local lib_state = require('litee.lib.state')
-local lib_util_buf = require('litee.lib.util.buffer')
-local config = require('litee.lib.config').config["term"]
+local lib_panel = require("litee.lib.panel")
+local lib_state = require("litee.lib.state")
+local lib_util_buf = require("litee.lib.util.buffer")
+local config = require("litee.lib.config").config["term"]
 
 local M = {}
 
-local opts = {noremap = true, silent=true}
+local opts = { noremap = true, silent = true }
 local function terminal_buf_setup(buf)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>v", "<cmd>lua require('configs.terminal').terminal_vsplit()<cr>", opts)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>n", "<C-\\><C-n>", opts)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>h", "<C-\\><C-n><C-w>h", opts)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>j", "<C-\\><C-n><C-w>j", opts)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>k", "<C-\\><C-n><C-w>k", opts)
-    vim.api.nvim_buf_set_keymap(buf, 't', "<C-w>l", "<C-\\><C-n><C-w>l", opts)
-    vim.api.nvim_buf_set_option(buf, 'bufhidden', 'hide')
-	if config.map_resize_keys then
-           lib_util_buf.map_resize_keys(config.position, buf, opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>v", "<cmd>lua require('configs.terminal').terminal_vsplit()<cr>", opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>n", "<C-\\><C-n>", opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>h", "<C-\\><C-n><C-w>h", opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>j", "<C-\\><C-n><C-w>j", opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>k", "<C-\\><C-n><C-w>k", opts)
+    vim.api.nvim_buf_set_keymap(buf, "t", "<C-w>l", "<C-\\><C-n><C-w>l", opts)
+    vim.api.nvim_set_option_value("bufhidden", "hide", { buf = buf })
+    if config.map_resize_keys then
+        lib_util_buf.map_resize_keys(config.position, buf, opts)
     end
 end
 local function terminal_win_setup(win)
-    vim.api.nvim_win_set_option(win, 'winfixheight', true)
+    vim.api.nvim_set_option_value("winfixheight", true, { win = win })
 end
 
 -- terminal opens a native Neovim terminal instance that
@@ -39,7 +39,7 @@ end
 -- the $SHELL environment variable must be set correctly
 -- to open the appropriate shell.
 function M.terminal()
-    local shell = vim.fn.getenv('SHELL')
+    local shell = vim.fn.getenv("SHELL")
     if shell == nil or shell == "" then
         return
     end
@@ -52,9 +52,9 @@ function M.terminal()
     terminal_buf_setup(buf)
 
     if config.position == "top" then
-        vim.cmd('topleft split')
+        vim.cmd("topleft split")
     else
-        vim.cmd('botright split')
+        vim.cmd("botright split")
     end
     vim.cmd("resize " .. config.term_size)
     terminal_win_setup(vim.api.nvim_get_current_win())
@@ -72,7 +72,7 @@ function M.terminal()
 end
 
 function M.terminal_vsplit()
-    local shell = vim.fn.getenv('SHELL')
+    local shell = vim.fn.getenv("SHELL")
     if shell == nil or shell == "" then
         return
     end
@@ -81,7 +81,7 @@ function M.terminal_vsplit()
         vim.api.nvim_err_writeln("failed to create terminal buffer")
         return
     end
-    vim.cmd('vsplit')
+    vim.cmd("vsplit")
     local cur_win = vim.api.nvim_get_current_win()
     terminal_win_setup(cur_win)
     vim.api.nvim_win_set_buf(cur_win, buf)
@@ -94,47 +94,43 @@ function M.list_terminals()
     for _, b in ipairs(vim.api.nvim_list_bufs()) do
         local buf_name = vim.api.nvim_buf_get_name(b)
         if vim.fn.match(buf_name, "term://") == 0 then
-            table.insert(terms, {name = buf_name, buf = b})
+            table.insert(terms, { name = buf_name, buf = b })
         end
     end
     if #terms == 0 then
         return
     end
-    vim.ui.select(
-        terms,
-        {
-            prompt = "select a terminal to display",
-            format_item = function(item)
-                return item["name"] .. " " .. item["buf"]
+    vim.ui.select(terms, {
+        prompt = "select a terminal to display",
+        format_item = function(item)
+            return item["name"] .. " " .. item["buf"]
+        end,
+    }, function(choice)
+        -- first see if there's a window that's opened with this term
+        for _, w in ipairs(vim.api.nvim_list_wins()) do
+            if vim.api.nvim_win_get_buf(w) == choice["buf"] then
+                vim.api.nvim_set_current_win(w)
+                return
             end
-        },
-        function (choice)
-            -- first see if there's a window that's opened with this term
-            for _, w in ipairs(vim.api.nvim_list_wins()) do
-                if vim.api.nvim_win_get_buf(w) == choice["buf"] then
-                    vim.api.nvim_set_current_win(w)
-                    return
-                end
-            end
-
-            if config.position == "top" then
-                vim.cmd('topleft split')
-            else
-                vim.cmd('botright split')
-            end
-            vim.cmd("resize " .. config.term_size)
-            local cur_win = vim.api.nvim_get_current_win()
-            local cur_tab = vim.api.nvim_get_current_tabpage()
-            local state = lib_state.get_state(cur_tab)
-            vim.api.nvim_win_set_buf(cur_win, choice["buf"])
-            if state ~= nil then
-                if lib_panel.is_panel_open(state) then
-                    lib_panel.toggle_panel_ctx(true, true)
-                end
-            end
-            vim.api.nvim_set_current_win(cur_win)
         end
-    )
+
+        if config.position == "top" then
+            vim.cmd("topleft split")
+        else
+            vim.cmd("botright split")
+        end
+        vim.cmd("resize " .. config.term_size)
+        local cur_win = vim.api.nvim_get_current_win()
+        local cur_tab = vim.api.nvim_get_current_tabpage()
+        local state = lib_state.get_state(cur_tab)
+        vim.api.nvim_win_set_buf(cur_win, choice["buf"])
+        if state ~= nil then
+            if lib_panel.is_panel_open(state) then
+                lib_panel.toggle_panel_ctx(true, true)
+            end
+        end
+        vim.api.nvim_set_current_win(cur_win)
+    end)
 end
 
 return M

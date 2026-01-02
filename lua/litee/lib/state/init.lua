@@ -35,8 +35,8 @@ end
 -- get_state_ctx is similiar to get_state but obtains
 -- the tab ID from the current Neovim context.
 function M.get_state_ctx()
-    local win    = vim.api.nvim_get_current_win()
-    local tab    = vim.api.nvim_win_get_tabpage(win)
+    local win = vim.api.nvim_get_current_win()
+    local tab = vim.api.nvim_win_get_tabpage(win)
     local state = M.registry[tab]
     return state
 end
@@ -49,7 +49,9 @@ end
 -- storing its state.
 function M.get_component_state(tab, component)
     local s = M.registry[tab]
-    if s == nil then return nil end
+    if s == nil then
+        return nil
+    end
     return s[component]
 end
 
@@ -68,7 +70,6 @@ function M.put_state(tab, state)
     M.registry[tab] = state
     return M.registry[tab]
 end
-
 
 -- put_component_state will store the component state for
 -- later retrieval.

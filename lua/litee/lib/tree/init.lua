@@ -1,4 +1,4 @@
-local lib_marshal = require('litee.lib.tree.marshal')
+local lib_marshal = require("litee.lib.tree.marshal")
 
 local M = {}
 
@@ -27,8 +27,8 @@ local registry = {}
 -- @returns tree_handle (int) A handle representing
 -- the created tree.
 function M.new_tree(kind)
-    local handle = #registry+1
-    registry[handle] = {root = {}, depth_table = {}, kind = kind}
+    local handle = #registry + 1
+    registry[handle] = { root = {}, depth_table = {}, kind = kind }
     return handle
 end
 
@@ -183,7 +183,7 @@ function M.add_node(handle, parent, children, external)
     pNode.children = {}
 
     local child_depth = parent.depth + 1
-    for _, child  in ipairs(children) do
+    for _, child in ipairs(children) do
         child.depth = child_depth
         table.insert(pNode.children, child)
     end
@@ -259,9 +259,9 @@ function M.reparent_node(handle, depth, node)
     end
     -- recurse to leafs
     for _, child in ipairs(node.children) do
-        M.reparent_node(handle, depth+1, child)
+        M.reparent_node(handle, depth + 1, child)
         -- recursion done, update your depth
-        child.depth = depth+1
+        child.depth = depth + 1
     end
     if depth == 0 then
         -- we are the root node, refresh depth_table with
@@ -295,9 +295,9 @@ end
 -- @param tree (int) The tree handle to marshal into the provided buffer
 -- @param marshal_func (function(node)) A function
 -- when given a node returns the following strings
-    -- name: the display name for the node
-    -- detail: details to display about the node
-    -- icon: any icon associated with the node
+-- name: the display name for the node
+-- detail: details to display about the node
+-- icon: any icon associated with the node
 function M.write_tree(buf, tree, marshal_func, no_guide_leaf)
     local root = registry[tree].root
     if root == nil then

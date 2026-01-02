@@ -1,7 +1,7 @@
-local lib_state         = require('litee.lib.state')
-local lib_tree_config   = require('litee.lib.config').config["tree"]
-local lib_icons         = require('litee.lib.icons')
-local lib_hi            = require('litee.lib.highlights')
+local lib_state = require("litee.lib.state")
+local lib_tree_config = require("litee.lib.config").config["tree"]
+local lib_icons = require("litee.lib.icons")
+local lib_hi = require("litee.lib.highlights")
 
 local M = {}
 

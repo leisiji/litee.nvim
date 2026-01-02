@@ -1,15 +1,15 @@
-local config    = require('litee.lib.config').config
-local lib_hi    = require('litee.lib.highlights')
-local lib_panel = require('litee.lib.panel')
+local config = require("litee.lib.config").config
+local lib_hi = require("litee.lib.highlights")
+local lib_panel = require("litee.lib.panel")
 
 local function jump_to_location(location)
-  local client = vim.lsp.get_clients({ bufnr = bufnr })[1]
-  local offset_encoding = client and client.offset_encoding or "utf-16"
-  if vim.lsp.util.show_document then
-    vim.lsp.util.show_document(location, offset_encoding, { focus = true })
-  else
-    vim.lsp.util.jump_to_location(location, offset_encoding, true)
-  end
+    local client = vim.lsp.get_clients({ bufnr = bufnr })[1]
+    local offset_encoding = client and client.offset_encoding or "utf-16"
+    if vim.lsp.util.show_document then
+        vim.lsp.util.show_document(location, offset_encoding, { focus = true })
+    else
+        vim.lsp.util.jump_to_location(location, offset_encoding, true)
+    end
 end
 
 local M = {}
@@ -32,13 +32,13 @@ M.last_highlighted_buffer = nil
 local function move_or_create(orientation)
     local cur_win = vim.api.nvim_get_current_win()
     if orientation == "left" then
-        vim.cmd('wincmd l')
+        vim.cmd("wincmd l")
     elseif orientation == "right" then
-        vim.cmd('wincmd h')
+        vim.cmd("wincmd h")
     elseif orientation == "top" then
-        vim.cmd('wincmd j')
+        vim.cmd("wincmd j")
     elseif orientation == "bottom" then
-        vim.cmd('wincmd k')
+        vim.cmd("wincmd k")
     end
     if cur_win == vim.api.nvim_get_current_win() then
         if orientation == "left" then
@@ -120,7 +120,7 @@ function M.jump_neighbor(location, node, offset_encoding)
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         local name = vim.api.nvim_buf_get_name(buf)
         if name == "" then
-            vim.api.nvim_buf_delete(buf, {force=true})
+            vim.api.nvim_buf_delete(buf, { force = true })
         end
     end
 end
@@ -164,7 +164,7 @@ function M.jump_invoking(location, win, node, offset_encoding)
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
         local name = vim.api.nvim_buf_get_name(buf)
         if name == "" then
-            vim.api.nvim_buf_delete(buf, {force=true})
+            vim.api.nvim_buf_delete(buf, { force = true })
         end
     end
 
@@ -184,16 +184,8 @@ end
 -- they will be highlighted as well.
 function M.set_jump_hl(set, node)
     if not set then
-        if
-            M.last_highlighted_buffer ~= nil
-            and vim.api.nvim_buf_is_valid(M.last_highlighted_buffer)
-        then
-            vim.api.nvim_buf_clear_namespace(
-                M.last_highlighted_buffer,
-                M.jump_higlight_ns,
-                0,
-                -1
-            )
+        if M.last_highlighted_buffer ~= nil and vim.api.nvim_buf_is_valid(M.last_highlighted_buffer) then
+            vim.api.nvim_buf_clear_namespace(M.last_highlighted_buffer, M.jump_higlight_ns, 0, -1)
         end
         return
     end

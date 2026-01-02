@@ -1,4 +1,4 @@
-local lib_notify = require('litee.lib.notify')
+local lib_notify = require("litee.lib.notify")
 local M = {}
 
 function M.buf_document_symbol()

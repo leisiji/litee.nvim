@@ -10,8 +10,7 @@ local M = {}
 -- @param post_cb function() A callback which fires just after
 -- the cursor move.
 function M.next(component_state, pre_cb, post_cb)
-    if component_state.win == nil
-        or not vim.api.nvim_win_is_valid(component_state.win) then
+    if component_state.win == nil or not vim.api.nvim_win_is_valid(component_state.win) then
         return
     end
     local cur_cursor = vim.api.nvim_win_get_cursor(component_state.win)
@@ -20,9 +19,13 @@ function M.next(component_state, pre_cb, post_cb)
         return
     end
     cur_cursor[1] = cur_cursor[1] + 1
-    if pre_cb ~= nil then pre_cb() end
+    if pre_cb ~= nil then
+        pre_cb()
+    end
     vim.api.nvim_win_set_cursor(component_state.win, cur_cursor)
-    if post_cb ~= nil then pre_cb() end
+    if post_cb ~= nil then
+        pre_cb()
+    end
 end
 
 -- next moves the cursor in the window of the provided
@@ -35,8 +38,7 @@ end
 -- @param post_cb function() A callback which fires just after
 -- the cursor move.
 function M.previous(component_state, pre_cb, post_cb)
-    if component_state.win == nil
-        or not vim.api.nvim_win_is_valid(component_state.win) then
+    if component_state.win == nil or not vim.api.nvim_win_is_valid(component_state.win) then
         return
     end
     local cur_cursor = vim.api.nvim_win_get_cursor(component_state.win)
@@ -44,9 +46,13 @@ function M.previous(component_state, pre_cb, post_cb)
         return
     end
     cur_cursor[1] = cur_cursor[1] - 1
-    if pre_cb ~= nil then pre_cb() end
+    if pre_cb ~= nil then
+        pre_cb()
+    end
     vim.api.nvim_win_set_cursor(component_state.win, cur_cursor)
-    if post_cb ~= nil then pre_cb() end
+    if post_cb ~= nil then
+        pre_cb()
+    end
 end
 
 return M
