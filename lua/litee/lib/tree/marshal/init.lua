@@ -97,9 +97,39 @@ function M.marshal_node(node, marshal_func, no_guide_leaf)
 
     -- ▶ Func1
     str = str .. expand_guide .. icon_set["Space"]
-    str = str .. icon .. icon_set["Space"] .. icon_set["Space"] .. name
-    -- return detail as virtual text chunk.
-    return str, { { detail, lib_hi.hls.SymbolDetailHL } }
+    str = str .. icon
+
+    local colors = {
+        lib_hi.hls.SymbolNameColor0,
+        lib_hi.hls.SymbolNameColor1,
+        lib_hi.hls.SymbolNameColor2,
+        lib_hi.hls.SymbolNameColor3,
+        lib_hi.hls.SymbolNameColor4,
+        lib_hi.hls.SymbolNameColor5,
+    }
+    local color_idx = (node.depth - 1) % #colors + 1
+    local name_hl = colors[color_idx]
+
+    local virt_text = {}
+    if name ~= "" then
+        table.insert(virt_text, { name .. " ", name_hl })
+    end
+    if detail ~= "" then
+        local formatted_detail = detail
+        local parts = vim.split(vim.trim(detail), "%s+")
+        if #parts >= 2 then
+            local path = parts[1]
+            local line = parts[2]
+            local filename = vim.fn.fnamemodify(path, ":t")
+            formatted_detail = "[" .. filename .. ":" .. line .. "]"
+        end
+        table.insert(virt_text, { formatted_detail, "Comment" })
+    end
+    if #virt_text == 0 then
+        virt_text = { { "", "" } }
+    end
+
+    return str, virt_text
 end
 
 -- marshal_line takes a UI buffer line and

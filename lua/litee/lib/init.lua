@@ -11,17 +11,17 @@ M.icon_set = nil
 local function icon_set()
     local tree = config.tree
     local base = lib_icons[tree.icon_set] or lib_icons["default"]
-    local icon_set = nil
+    local icons = nil
     if tree.icon_set_custom ~= nil then
-        icon_set = tree.icon_set_custom
+        icons = tree.icon_set_custom
         -- merge custom icon with the default
-        for key, val in pairs(base) do
-            icon_set[key] = icon_set[key] or base[key]
+        for key, _ in pairs(base) do
+            icons[key] = icons[key] or base[key]
         end
     else
-        icon_set = base
+        icons = base
     end
-    M.icon_set = icon_set
+    M.icon_set = icons
 end
 
 -- If a custom icon_set (table) is provided by the user,
@@ -31,16 +31,16 @@ end
 -- When both arguments are provided, the custom icon_set is merged
 -- with the icons given by its name from `lib_icons`.
 function M.icon_set_update(custom, icon_key)
-    local icon_set = nil
+    local icons = nil
     if custom ~= nil then
-        icon_set = icon_key and lib_icons[icon_key] or M.icon_set
-        for key, val in pairs(custom) do
-            icon_set[key] = custom[key]
+        icons = icon_key and lib_icons[icon_key] or M.icon_set
+        for key, _ in pairs(custom) do
+            icons[key] = custom[key]
         end
     else
-        icon_set = lib_icons[icon_key] or lib_icons["default"]
+        icons = lib_icons[icon_key] or lib_icons["default"]
     end
-    return icon_set
+    return icons
 end
 
 local function merge_subconfig(component, user_subconfig)
